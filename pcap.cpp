@@ -38,13 +38,13 @@ int main(int argc, char* argv[]){
 		if (res == 0){
 			continue;
 		}else if(res == -1 || res == -2){
-			printf("pcap_next_ex return %d(%s)\n", res, pcap_geterr(handle));
+			//printf("pcap_next_ex return %d(%s)\n", res, pcap_geterr(handle));
 			break;
 		}
-		//printf("%u bytes captured\n", header->caplen);
-		//
+		
+		printf("\n %u bytes\n", header->caplen);
 
-		eth_hdr = (struct ethernet_hdr *) packet;
+		eth_hdr = (struct ethernet_hdr *)packet;
 
 		if(ntohs(eth_hdr->ether_type) == ETHERTYPE_IP){
 			iphdr = (struct ip *) (packet + sizeof(ethernet_hdr));
@@ -52,9 +52,10 @@ int main(int argc, char* argv[]){
 			printf("dip : %s\n", inet_ntoa(iphdr->ip_dst));
 
 			if(iphdr->ip_p == IPPROTO_TCP){
-				tcp_hdr = (struct tcphdr *) (packet + sizeof(ip));
+				tcp_hdr = (struct tcphdr *) (packet + sizeof(ethernet_hdr) + sizeof(ip));
 				printf("sport : %d\n", ntohs(tcp_hdr->th_sport));
 				printf("dport : %d\n", ntohs(tcp_hdr->th_dport));
+				printf("\n");
 			}
 		}
 
