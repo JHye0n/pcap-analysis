@@ -3,6 +3,7 @@
 #include <netinet/in.h>
 #include <netinet/ip.h>
 #include <netinet/tcp.h>
+#include <netinet/udp.h>
 #include <libnet.h> /* apt-get install libnet-dev */
 
 struct ethernet_hdr
@@ -14,6 +15,7 @@ struct ethernet_hdr
 
 struct ip *iphdr;
 struct tcphdr *tcp_hdr;
+struct udphdr *udp_hdr;
 
 int main(int argc, char* argv[]){
 	if(argc < 2){
@@ -42,21 +44,31 @@ int main(int argc, char* argv[]){
 			break;
 		}
 		
-		printf("\n %u bytes\n", header->caplen);
+		//printf("\n %u bytes\n", header->caplen);
 
 		eth_hdr = (struct ethernet_hdr *)packet;
 
 		if(ntohs(eth_hdr->ether_type) == ETHERTYPE_IP){
 			iphdr = (struct ip *) (packet + sizeof(ethernet_hdr));
-			printf("sip : %s\n", inet_ntoa(iphdr->ip_src));
-			printf("dip : %s\n", inet_ntoa(iphdr->ip_dst));
 
 			if(iphdr->ip_p == IPPROTO_TCP){
+				printf("###### tcp packet ######\n");
 				tcp_hdr = (struct tcphdr *) (packet + sizeof(ethernet_hdr) + sizeof(ip));
+				printf("sip : %s\n", inet_ntoa(iphdr->ip_src));
+                        	printf("dip : %s\n", inet_ntoa(iphdr->ip_dst));
 				printf("sport : %d\n", ntohs(tcp_hdr->th_sport));
 				printf("dport : %d\n", ntohs(tcp_hdr->th_dport));
 				printf("\n");
 			}
+
+			if(iphdr->ip_p == IPPROTO_UDP){
+				printf("###### udp packet ######\n");
+				udp_hdr = (struct udphdr *) (packet + sizeof(ethernet_hdr) + sizeof(tcphdr));
+				printf("udp address A : %s\n", inet_ntoa(iphdr->ip_src));
+				printf("udp sport : %d\n", ntohs(udp_hdr->uh_sport));
+				printf("\n");
+			}
+
 		}
 
 
