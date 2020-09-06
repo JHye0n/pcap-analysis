@@ -6,6 +6,9 @@
 #include <netinet/udp.h>
 #include <libnet.h> /* apt-get install libnet-dev */
 
+static int tcp_packet_count = 0;
+static int udp_packet_count = 0;
+
 struct ethernet_hdr
 {
     u_int8_t  ether_dhost[ETHER_ADDR_LEN];/* destination ethernet address */
@@ -40,7 +43,6 @@ int main(int argc, char* argv[]){
 		if (res == 0){
 			continue;
 		}else if(res == -1 || res == -2){
-			//printf("pcap_next_ex return %d(%s)\n", res, pcap_geterr(handle));
 			break;
 		}
 		
@@ -53,21 +55,33 @@ int main(int argc, char* argv[]){
 
 			if(iphdr->ip_p == IPPROTO_TCP){
 				printf("###### tcp packet ######\n");
+				printf("tcp packet count : %d\n", ++tcp_packet_count);
 				tcp_hdr = (struct tcphdr *) (packet + sizeof(ethernet_hdr) + sizeof(ip));
-				printf("sip : %s\n", inet_ntoa(iphdr->ip_src));
-                        	printf("dip : %s\n", inet_ntoa(iphdr->ip_dst));
-				printf("sport : %d\n", ntohs(tcp_hdr->th_sport));
-				printf("dport : %d\n", ntohs(tcp_hdr->th_dport));
+				printf("Address A %s\n", inet_ntoa(iphdr->ip_src));
+				printf("Port A : %d\n", ntohs(tcp_hdr->th_sport));
+				printf("Address B %s\n", inet_ntoa(iphdr->ip_dst));
+				printf("Port B : %d\n", ntohs(tcp_hdr->th_dport));
+				printf("Bytes : %d\n", header->caplen);
 				printf("\n");
 			}
+			
+			printf("\n");
 
 			if(iphdr->ip_p == IPPROTO_UDP){
 				printf("###### udp packet ######\n");
+				printf("udp packet count : %d\n", ++udp_packet_count);
 				udp_hdr = (struct udphdr *) (packet + sizeof(ethernet_hdr) + sizeof(tcphdr));
-				printf("udp address A : %s\n", inet_ntoa(iphdr->ip_src));
-				printf("udp sport : %d\n", ntohs(udp_hdr->uh_sport));
+
+				// udp information
+				printf("Address A %s\n", inet_ntoa(iphdr->ip_src));
+				printf("Port A %d\n", ntohs(udp_hdr->uh_sport));
+				printf("Address B %s\n", inet_ntoa(iphdr->ip_dst));
+				printf("Port B %d\n", ntohs(udp_hdr->uh_dport));
+				printf("Bytes : %d\n", header->caplen);
 				printf("\n");
+
 			}
+
 
 		}
 
