@@ -41,7 +41,7 @@ void tcp(struct pcap_pkthdr* header, const u_char* packet, ListHeader *tcppacket
 		temp->port_a = tcp_hdr->th_sport;
 		temp->port_b = tcp_hdr->th_dport;
 
-		if((inet_ntoa(temp->address_a) == inet_ntoa(iphdr->ip_src)) && ntohs(temp->port_a) == ntohs(tcp_hdr->th_sport) && ntohs(temp->port_b) == ntohs(tcp_hdr->th_dport)){
+		if((inet_ntoa(temp->address_a) == inet_ntoa(iphdr->ip_src)) && inet_ntoa(temp->address_b) == inet_ntoa(iphdr->ip_dst) && ntohs(temp->port_a) == ntohs(tcp_hdr->th_sport) && ntohs(temp->port_b) == ntohs(tcp_hdr->th_dport)){
 			printf("temp a %s\n", inet_ntoa(temp->address_a));
 			printf("real a %s\n", inet_ntoa(iphdr->ip_src));
 			printf("temp b %s\n", inet_ntoa(temp->address_b));
@@ -59,7 +59,7 @@ void tcp(struct pcap_pkthdr* header, const u_char* packet, ListHeader *tcppacket
 		temp->port_a = tcp_hdr->th_dport;
 		temp->port_b = tcp_hdr->th_sport;
 
-		if((inet_ntoa(temp->address_a) == inet_ntoa(iphdr->ip_src)) && ntohs(temp->port_a) == ntohs(tcp_hdr->th_sport) && ntohs(temp->port_b) == ntohs(tcp_hdr->th_dport)){
+		if((inet_ntoa(temp->address_a) == inet_ntoa(iphdr->ip_dst)) && inet_ntoa(temp->address_b) == inet_ntoa(iphdr->ip_src) && ntohs(temp->port_a) == ntohs(tcp_hdr->th_dport) && ntohs(temp->port_b) == ntohs(tcp_hdr->th_sport)){
 			temp->packet_b_to_a++;
 			temp->packet_b_to_a_byte = header->caplen;
 		}
