@@ -7,8 +7,22 @@
 #include <libnet.h> /* apt-get install libnet-dev */
 #include <stdlib.h>
 
-static int packet_a_to_b = 0;
-static int packet_b_to_a = 0;
+//static int packet_a_to_b = 0;
+//static int packet_b_to_a = 0;
+
+typedef struct ListNode{
+	in_addr address_a;
+	in_addr address_b;
+	u_short port_a;
+	u_short port_b;
+	struct ListNode *link;
+};
+
+typedef struct ListHeader{
+	int length;
+	ListNode *head;
+	ListNode *tail;
+};
 
 struct ethernet_hdr
 {
@@ -22,7 +36,7 @@ struct tcphdr *tcp_hdr;
 struct udphdr *udp_hdr;
 
 
-char *getmyipaddr(){
+/*char *getmyipaddr(){
 	int fd;
 	struct ifreq ifr;
 
@@ -37,8 +51,27 @@ char *getmyipaddr(){
 	close(fd);
 
 	return inet_ntoa(((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr);
+}*/
+
+void init(ListHeader *plist){
+	plist->length = 0;
+	plist->head = plist->tail = NULL;
 }
 
+void tcp(const u_char* packet, ListHeader *tcp_packet){
+	//ListNode *tcp_p = tcp_packet->head;
+	ListNode *tcp_p = tcp_packet->head;
+	struct ethernet_hdr *eth_hdr;
+	eth_hdr = (struct ethernet_hdr *) packet;
+
+	if(ntohs(eth_hdr->ether_type) == ETHERTYPE_IP){
+		iphdr = (struct ip *) (packet + sizeof(ethernet_hdr));
+
+		if(iphdr->ip_p == IPPROTO_TCP){
+			tcp_hdr = (struct tcphdr *) (packet + sizeof(ethernet_hdr) + sizeof(ip));
+		}
+	}
+}
 
 int main(int argc, char* argv[]){
 	if(argc < 2){
@@ -48,7 +81,16 @@ int main(int argc, char* argv[]){
 
 	char* pcap_file = argv[1];
 	char errbuf[PCAP_ERRBUF_SIZE];
-	char *myip = getmyipaddr();
+	
+	//listheader added
+	ListHeader tcp_packet, udp_packet;
+
+	//listheader clear
+	init(&tcp_packet);
+	init(&udp_packet);
+
+
+	//char *myip = getmyipaddr();
 	pcap_t *handle = pcap_open_offline(pcap_file, errbuf);
 
 	if(handle == nullptr){
@@ -69,42 +111,8 @@ int main(int argc, char* argv[]){
 		
 		//printf("\n %u bytes\n", header->caplen);
 
-		eth_hdr = (struct ethernet_hdr *)packet;
-
-		if(ntohs(eth_hdr->ether_type) == ETHERTYPE_IP){
-			iphdr = (struct ip *) (packet + sizeof(ethernet_hdr));
-
-			if(iphdr->ip_p == IPPROTO_TCP){
-				printf("###### tcp packet ######\n");
-				tcp_hdr = (struct tcphdr *) (packet + sizeof(ethernet_hdr) + sizeof(ip));
-
-				if(strcmp(myip, inet_ntoa(iphdr->ip_src)) == 0){
-					printf("address a : %s\n", inet_ntoa(iphdr->ip_src));
-					printf("address b : %s\n", inet_ntoa(iphdr->ip_dst));
-					printf("Port A : %d\n", ntohs(tcp_hdr->th_sport));
-					printf("Port B : %d\n", ntohs(tcp_hdr->th_dport));
-					printf("packet a to b : %d\n", packet_a_to_b);
-				}else{
-					printf("address a : %s\n", inet_ntoa(iphdr->ip_dst));
-					printf("address b : %s\n", inet_ntoa(iphdr->ip_src));
-					printf("Port A : %d\n", ntohs(tcp_hdr->th_dport));
-					printf("Port B : %d\n" ,ntohs(tcp_hdr->th_sport));
-					printf("packet b to a : %d\n", packet_b_to_a);
-				}
-					
-				//printf("Address A %s\n", inet_ntoa(iphdr->ip_src));
-				//printf("Port A : %d\n", ntohs(tcp_hdr->th_sport));
-				//printf("Address B %s\n", inet_ntoa(iphdr->ip_dst));
-				//printf("Port B : %d\n", ntohs(tcp_hdr->th_dport));
-				//printf("Bytes : %d\n", header->caplen);
-				//printf("Packet A->B : %d\n", packet_a_to_b);
-				//printf("Packet B->A : %d\n", packet_b_to_a);
-				printf("\n");
-			}
-			
-			printf("\n");
-
-			if(iphdr->ip_p == IPPROTO_UDP){
+		tcp(packet, &tcp_packet);
+			/*if(iphdr->ip_p == IPPROTO_UDP){
 				printf("###### udp packet ######\n");
 				udp_hdr = (struct udphdr *) (packet + sizeof(ethernet_hdr) + sizeof(tcphdr));
 
@@ -121,7 +129,7 @@ int main(int argc, char* argv[]){
 			}
 
 
-		}
+		}*/
 
 
 	}
