@@ -12,6 +12,10 @@ typedef struct ListNode{
         in_addr address_b;
         u_short port_a;
         u_short port_b;
+	int packet_a_to_b;
+	int packet_a_to_b_byte;
+	int packet_b_to_a;
+	int packet_b_to_a_byte;
         struct ListNode *link;
 } ListNode;
 
