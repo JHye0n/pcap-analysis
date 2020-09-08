@@ -16,13 +16,13 @@ typedef struct ListNode{
 	u_short port_a;
 	u_short port_b;
 	struct ListNode *link;
-};
+} ListNode;
 
 typedef struct ListHeader{
 	int length;
 	ListNode *head;
 	ListNode *tail;
-};
+} ListHeader;
 
 struct ethernet_hdr
 {
@@ -36,7 +36,7 @@ struct tcphdr *tcp_hdr;
 struct udphdr *udp_hdr;
 
 
-/*char *getmyipaddr(){
+char *getmyipaddr(){
 	int fd;
 	struct ifreq ifr;
 
@@ -51,15 +51,14 @@ struct udphdr *udp_hdr;
 	close(fd);
 
 	return inet_ntoa(((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr);
-}*/
+}
 
 void init(ListHeader *plist){
 	plist->length = 0;
 	plist->head = plist->tail = NULL;
 }
 
-void tcp(const u_char* packet, ListHeader *tcp_packet){
-	//ListNode *tcp_p = tcp_packet->head;
+void tcp(const u_char* packet, ListHeader *tcp_packet, char *myip){
 	ListNode *tcp_p = tcp_packet->head;
 	struct ethernet_hdr *eth_hdr;
 	eth_hdr = (struct ethernet_hdr *) packet;
@@ -69,7 +68,22 @@ void tcp(const u_char* packet, ListHeader *tcp_packet){
 
 		if(iphdr->ip_p == IPPROTO_TCP){
 			tcp_hdr = (struct tcphdr *) (packet + sizeof(ethernet_hdr) + sizeof(ip));
+
+			//printf("%d\n", ntohs(tcp_hdr->th_sport));
+
+			//printf("%s\n", myip);
+			//printf("%s\n", inet_ntoa(iphdr->ip_src));
+			//printf("%s\n", inet_ntoa(iphdr->ip_dst));
+
+			if(strcmp(myip, inet_ntoa(iphdr->ip_src)) == 0){
+				printf("Address A : %s\n", inet_ntoa(iphdr->ip_src));
+				printf("PORT A : %d\n", ntohs(tcp_hdr->th_sport));
+				printf("Address B : %s\n", inet_ntoa(iphdr->ip_dst));
+				printf("PORT B : %d\n", ntohs(tcp_hdr->th_dport));
+				printf("\n");
+			}
 		}
+
 	}
 }
 
@@ -84,7 +98,6 @@ void udp(const u_char* packet, ListHeader *udp_packet){
 		if(iphdr->ip_p == IPPROTO_UDP){
 			udp_hdr = (struct udphdr *) (packet + sizeof(ethernet_hdr) + sizeof(tcphdr));
 
-			printf("%d\n", ntohs(udp_hdr->uh_sport));
 		}
 	}
 }
@@ -97,6 +110,9 @@ int main(int argc, char* argv[]){
 
 	char* pcap_file = argv[1];
 	char errbuf[PCAP_ERRBUF_SIZE];
+
+	//myip
+	char *myip = getmyipaddr();
 	
 	//listheader added
 	ListHeader tcp_packet, udp_packet;
@@ -126,13 +142,15 @@ int main(int argc, char* argv[]){
 		}
 		
 		//tcp packet
-		tcp(packet, &tcp_packet);
+		tcp(packet, &tcp_packet, myip);
 		
 		//udp packet
 		udp(packet, &udp_packet);
 
 
 	}
+
+	pcap_close(handle);
 
 	return 0;
 }
