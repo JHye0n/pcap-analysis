@@ -73,6 +73,22 @@ void tcp(const u_char* packet, ListHeader *tcp_packet){
 	}
 }
 
+void udp(const u_char* packet, ListHeader *udp_packet){
+	ListNode *udp_p = udp_packet->head;
+	struct ethernet_hdr *eth_hdr;
+	eth_hdr = (struct ethernet_hdr *) packet;
+
+	if(ntohs(eth_hdr->ether_type) == ETHERTYPE_IP){
+		iphdr = (struct ip *) (packet + sizeof(ethernet_hdr));
+
+		if(iphdr->ip_p == IPPROTO_UDP){
+			udp_hdr = (struct udphdr *) (packet + sizeof(ethernet_hdr) + sizeof(tcphdr));
+
+			printf("%d\n", ntohs(udp_hdr->uh_sport));
+		}
+	}
+}
+
 int main(int argc, char* argv[]){
 	if(argc < 2){
 		printf("Argument Error | Usage : %s <pcap_file>\n",argv[0]);
@@ -109,27 +125,11 @@ int main(int argc, char* argv[]){
 			break;
 		}
 		
-		//printf("\n %u bytes\n", header->caplen);
-
+		//tcp packet
 		tcp(packet, &tcp_packet);
-			/*if(iphdr->ip_p == IPPROTO_UDP){
-				printf("###### udp packet ######\n");
-				udp_hdr = (struct udphdr *) (packet + sizeof(ethernet_hdr) + sizeof(tcphdr));
-
-				// udp information
-				printf("Address A %s\n", inet_ntoa(iphdr->ip_src));
-				printf("Port A %d\n", ntohs(udp_hdr->uh_sport));
-				printf("Address B %s\n", inet_ntoa(iphdr->ip_dst));
-				printf("Port B %d\n", ntohs(udp_hdr->uh_dport));
-				printf("Bytes : %d\n", header->caplen);
-				printf("Packet A->B : 1\n");
-				printf("Packet B->A : 1\n");
-				printf("\n");
-
-			}
-
-
-		}*/
+		
+		//udp packet
+		udp(packet, &udp_packet);
 
 
 	}
