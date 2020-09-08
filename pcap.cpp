@@ -47,6 +47,8 @@ void tcp(struct pcap_pkthdr* header, const u_char* packet, ListHeader *tcppacket
 					status = 1;
 				}
 			}
+		}else{
+			status = 0;
 		}
 
 		if(status == 0){
@@ -61,13 +63,15 @@ void tcp(struct pcap_pkthdr* header, const u_char* packet, ListHeader *tcppacket
 		temp->port_a = tcp_hdr->th_dport;
 		temp->port_b = tcp_hdr->th_sport;
 
-		if(strcmp(inet_ntoa(temp->address_a), inet_ntoa(iphdr->ip_src)) == 0 && strcmp(inet_ntoa(temp->address_b), inet_ntoa(iphdr->ip_dst)) == 0){
-                        if(temp->port_a == ntohs(tcp_hdr->th_sport)){
-                                if(temp->port_b == ntohs(tcp_hdr->th_dport)){
+		if(strcmp(inet_ntoa(temp->address_a), inet_ntoa(iphdr->ip_dst)) == 0 && strcmp(inet_ntoa(temp->address_b), inet_ntoa(iphdr->ip_src)) == 0){
+                        if(temp->port_a == ntohs(tcp_hdr->th_dport)){
+                                if(temp->port_b == ntohs(tcp_hdr->th_sport)){
                                         status = 1;
                                 }
                         }
 
+		}else{
+			status = 0;
 		}
 
 		if(status == 0){
@@ -75,16 +79,17 @@ void tcp(struct pcap_pkthdr* header, const u_char* packet, ListHeader *tcppacket
 			temp->packet_b_to_a_byte = header->caplen;
 		}
 
-		printf("Address A : %s\n", inet_ntoa(temp->address_a));
-		printf("Port A : %d\n", ntohs(temp->port_a));
-		printf("Address B : %s\n", inet_ntoa(temp->address_b));
-		printf("Port B : %d\n", ntohs(temp->port_b));
-		printf("Packet A->B : %d\n", temp->packet_a_to_b);
-		printf("Packet A->B Bytes : %d\n", temp->packet_a_to_b_byte);
-		printf("Packet B->A : %d\n", temp->packet_b_to_a);
-		printf("Packet B->A Bytes : %d\n", temp->packet_b_to_a_byte);
-		printf("\n");
 	}
+
+	printf("Address A : %s\n", inet_ntoa(temp->address_a));
+        printf("Port A : %d\n", ntohs(temp->port_a));
+        printf("Address B : %s\n", inet_ntoa(temp->address_b));
+        printf("Port B : %d\n", ntohs(temp->port_b));
+        printf("Packet A->B : %d\n", temp->packet_a_to_b);
+        printf("Packet A->B Bytes : %d\n", temp->packet_a_to_b_byte);
+        printf("Packet B->A : %d\n", temp->packet_b_to_a);
+        printf("Packet B->A Bytes : %d\n", temp->packet_b_to_a_byte);
+        printf("\n");
 
 	free(temp);
 }
