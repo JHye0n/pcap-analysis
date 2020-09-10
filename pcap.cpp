@@ -29,7 +29,6 @@ void init(ListHeader *packet){
 	packet->head = packet->tail = NULL;
 }
 
-
 void tcp(struct pcap_pkthdr* header, const u_char* packet, ListHeader *tcppacket, char *myip){
 	ListNode *temp = (ListNode *)malloc(sizeof(ListNode));
 	//ListNode *tcp_p = tcppacket->head;
@@ -44,6 +43,7 @@ void tcp(struct pcap_pkthdr* header, const u_char* packet, ListHeader *tcppacket
 		if(inet_ntoa(temp->address_a) == inet_ntoa(iphdr->ip_src) && inet_ntoa(temp->address_b) == inet_ntoa(iphdr->ip_dst) && ntohs(temp->port_a) == ntohs(tcp_hdr->th_sport) && ntohs(temp->port_b) == ntohs(tcp_hdr->th_dport)){
 			temp->packet_a_to_b++;
 			temp->packet_a_to_b_byte = header->caplen;
+
 		}
 
 	}else{
@@ -55,6 +55,7 @@ void tcp(struct pcap_pkthdr* header, const u_char* packet, ListHeader *tcppacket
 		if(inet_ntoa(temp->address_a) == inet_ntoa(iphdr->ip_dst) && inet_ntoa(temp->address_b) == inet_ntoa(iphdr->ip_src) && ntohs(temp->port_a) == ntohs(tcp_hdr->th_dport) && ntohs(temp->port_b) == ntohs(tcp_hdr->th_sport)){
 			temp->packet_b_to_a++;
 			temp->packet_b_to_a_byte = header->caplen;
+			
 		}
 
 	}
@@ -70,10 +71,9 @@ void tcp(struct pcap_pkthdr* header, const u_char* packet, ListHeader *tcppacket
         printf("Packet B->A Bytes : %d\n", temp->packet_b_to_a_byte);
         printf("\n");
 
-	free(temp);
 }
 
-void udp(struct pcap_pkthdr* header, const u_char* packet, ListHeader *udppacket, char *myip){
+/*void udp(struct pcap_pkthdr* header, const u_char* packet, ListHeader *udppacket, char *myip){
         ListNode *temp = (ListNode *)malloc(sizeof(ListNode));
         //ListNode *udp_p = udppacket->head;
         udp_hdr = (struct udphdr *) (packet + sizeof(ethernet_hdr) + sizeof(tcphdr));
@@ -114,7 +114,7 @@ void udp(struct pcap_pkthdr* header, const u_char* packet, ListHeader *udppacket
         printf("\n");
 
         free(temp);
-}
+}*/
 
 int main(int argc, char* argv[]){
 	if(argc < 2){
@@ -152,14 +152,11 @@ int main(int argc, char* argv[]){
 
         	if(ntohs(eth_hdr->ether_type) == ETHERTYPE_IP){
                 	iphdr = (struct ip *) (packet + sizeof(ethernet_hdr));
-
-                	if(iphdr->ip_p == IPPROTO_TCP){
-				tcp(header, packet, &tcppacket, myip);
-			}else if(iphdr->ip_p == IPPROTO_UDP){
-				udp(header, packet, &udppacket, myip);
-			}
 		}
+
 	}
+
+	pcap_close(handle);
 
 	return 0;
 }
