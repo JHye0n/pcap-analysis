@@ -1,5 +1,5 @@
 #include <stdio.h>
 #include <string>
-#include <map>
+#include <hash_map>
 
-using namespace std;
+using namespace stdext;

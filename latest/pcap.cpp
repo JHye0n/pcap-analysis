@@ -37,12 +37,12 @@ int main(int argc, char* argv[]){
 			break;
 		}
 
-		eth_hdr = (struct ethernet_hdr *) packet;
+		/*eth_hdr = (struct ethernet_hdr *) packet;
 
 		if(ntohs(eth_hdr->ether_type) == ETHERTYPE_IP){
 			iphdr = (struct ip *) (packet + sizeof(ethernet_hdr));
 
-		}
+		}*/
 
 	}
 
