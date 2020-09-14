@@ -3,23 +3,13 @@
 #include <cstdio>
 #include <pcap.h>
 #include <iostream>
-#include <unordered_map>
+#include <map>
 #include "header.h" // header define
 #include "flow.h" // struct, class define
+#include "struct.h"
 
 void usage(char* argv[]){
 	printf("Usage %s <pcap-file>\n", argv[0]);
-}
-
-int flow_p(struct pcap_pkthdr* header, const u_char *packet)
-{
-	flowpacket flowinfo;
-
-	eth_hdr = (struct ethernet_hdr *) packet;
-
-	if(ntohs(eth_hdr->ether_type) == ETHERTYPE_IP){
-		iphdr = (struct ip *) (packet + sizeof(ethernet_hdr));
-	}
 }
 
 int main(int argc, char* argv[]){
@@ -48,8 +38,6 @@ int main(int argc, char* argv[]){
 		}else if(res == -1 || res == -2){
 			break;
 		}
-
-		flow_p(header, packet);
 
 	}
 
