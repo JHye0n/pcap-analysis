@@ -14,16 +14,13 @@ flow.h
 
 using namespace std;
 
-class flow
-{
-	private:
-		std::map<flowpacket, int> packetflow;
-	
-	public:
-		flow();
-		~flow();
-};
+class flowinfo{
 
-bool flowpacket::operator<(const flowpacket& otherflow) const{
-	return true;
-}
+	private:
+		map<flowpacket, int> packetinfo;
+		flowpacket temp;
+
+	public:
+		flowinfo();
+		~flowinfo();
+};
